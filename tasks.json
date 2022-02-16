@@ -1,0 +1,5 @@
+{
+    "start_browser": ["start browser", "open browser", "internet"],
+    "start_vs_code": ["vs code", "editor"],
+    "shutdown_computer": ["computer shutdown", "power off"]
+}

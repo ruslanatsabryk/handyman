@@ -1,21 +1,21 @@
 import speech_recognition as sr
 import pyttsx3
 from tasks import *
-from pprint import pprint
+import json
 
+def load_tasks():
+    with open("tasks.json") as t:
+        task_list = json.load(t)
+    return task_list
 
 
 if __name__ == "__main__":
 
-    tasks = {
-        "start_browser": ["start browser", "open browser", "internet"],
-        "start_vs_code": ["vs code", "editor"],
-        "shutdown_computer": ["computer shutdown", "power off"]
-    }
+    tasks = load_tasks()
     
     # Listening parameters
     listener = sr.Recognizer()
-    listener.energy_threshold = 600  # 300 minimum audio energy to consider for recording
+    listener.energy_threshold = 1000  # 300 minimum audio energy to consider for recording
     listener.dynamic_energy_threshold = True  # True
     listener.dynamic_energy_adjustment_damping = 0.15 # 0.15
     listener.dynamic_energy_ratio = 1.5 # 1.5
@@ -26,6 +26,8 @@ if __name__ == "__main__":
 
     talker = pyttsx3.init()
     talker.setProperty("rate", 150)
+    
+    # Set en-US voice for talker if avalable
     voices = talker.getProperty("voices")
     talker.setProperty("voice", voices[1].id)
     
@@ -34,21 +36,30 @@ if __name__ == "__main__":
     talker.runAndWait()
 
     # Listening loop
+    phrase_text = ''
     while True:
         try:
             with sr.Microphone() as source:
-                listener.adjust_for_ambient_noise(source=source, duration=0.2)
+                listener.adjust_for_ambient_noise(source=source, duration=0.7)
+                print("Ready to listen")
                 phrase_voice = listener.listen(source)
+                print("Wait please...")
                 phrase_text = listener.recognize_google(phrase_voice, language="en-US")
+                
         except sr.UnknownValueError:
             print("Google Speech Recognition could not understand audio")
+            listener = sr.Recognizer()
+            phrase_text = ''
         except sr.RequestError as e:
             print("Could not request results from Google Speech Recognition service; {0}".format(e))
+            listener = sr.Recognizer()
+            phrase_text = ''
 
-        print(phrase_text)
-        
-        # Execute function by key from global dictionary
-        for fun, v in tasks.items():
-            if phrase_text in v:
-                globals()[fun]()
-        phrase_text = ''
+        if phrase_text:
+            print(f"You sad:\n - {phrase_text.capitalize()}")
+            
+            # Execute function by key from global dictionary
+            for fun, v in tasks.items():
+                if phrase_text in v:
+                    globals()[fun]()
+            phrase_text = ''
