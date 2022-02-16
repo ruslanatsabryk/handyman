@@ -40,7 +40,7 @@ if __name__ == "__main__":
     while True:
         try:
             with sr.Microphone() as source:
-                listener.adjust_for_ambient_noise(source=source, duration=0.7)
+                listener.adjust_for_ambient_noise(source=source, duration=1.0)
                 print("Ready to listen")
                 phrase_voice = listener.listen(source)
                 print("Wait please...")
@@ -61,5 +61,5 @@ if __name__ == "__main__":
             # Execute function by key from global dictionary
             for fun, v in tasks.items():
                 if phrase_text in v:
-                    globals()[fun]()
+                    globals()[fun](listener, talker)
             phrase_text = ''
